@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MAC GST Calculator (India)</title>
+  <meta name="description" content="MAC GST Calculator for India: inclusive/exclusive GST, CGST/SGST vs IGST, multi-item billing, step-by-step breakdown." />
+
+  <!-- Link external stylesheet -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <div class="container">
+      <div class="title">
+        <div class="logo" aria-hidden="true"></div>
+        <div>
+          <h1>MAC GST Calculator (India)</h1>
+          <p class="subtitle">Inclusive & Exclusive GST • CGST/SGST vs IGST • Multi-item billing • Step-by-step breakdown</p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container" id="app">
+    <div class="grid">
+      <!-- INPUT CARD -->
+      <section class="card" aria-labelledby="calcHeading">
+        <h2 id="calcHeading">Add Item</h2>
+        <p class="muted">Enter price as either <strong>exclusive</strong> or <strong>inclusive</strong> of GST. Choose intra-state (CGST+SGST) or inter-state (IGST).</p>
+
+        <div class="row">
+          <div class="span-6">
+            <label for="name">Item / Service Name</label>
+            <input id="name" type="text" placeholder="e.g., Laptop Bag" />
+          </div>
+          <div class="span-3">
+            <label for="qty">Quantity</label>
+            <input id="qty" type="number" inputmode="decimal" min="0" step="1" value="1" />
+          </div>
+          <div class="span-3">
+            <label for="price">Unit Price</label>
+            <input id="price" type="number" inputmode="decimal" min="0" step="0.01" placeholder="₹" />
+          </div>
+
+          <div class="span-4">
+            <label for="mode">Price Type</label>
+            <select id="mode">
+              <option value="exclusive">Exclusive of GST</option>
+              <option value="inclusive">Inclusive of GST</option>
+            </select>
+          </div>
+          <div class="span-4">
+            <label for="rate">GST Rate</label>
+            <select id="rate">
+              <option value="0">0%</option>
+              <option value="5">5%</option>
+              <option value="12">12%</option>
+              <option value="18" selected>18%</option>
+              <option value="28">28%</option>
+              <option value="custom">Custom…</option>
+            </select>
+          </div>
+          <div class="span-4" id="customRateWrap" style="display:none">
+            <label for="customRate">Custom Rate (%)</label>
+            <input id="customRate" type="number" inputmode="decimal" min="0" step="0.01" placeholder="e.g., 7.5" />
+          </div>
+
+          <div class="span-6">
+            <label>Supply Type</label>
+            <div class="inline" role="group" aria-label="Supply type">
+              <button class="btn" id="intraBtn" aria-pressed="true">Intra-state (CGST + SGST)</button>
+              <button class="btn ghost" id="interBtn" aria-pressed="false">Inter-state (IGST)</button>
+            </div>
+          </div>
+          <div class="span-6" style="display:flex; align-items:flex-end; justify-content:flex-end; gap:10px;">
+            <button class="btn ghost" id="clearForm">Clear</button>
+            <button class="btn primary" id="addItem">Add Item</button>
+          </div>
+        </div>
+
+        <details class="breakdown">
+          <summary>How calculations work</summary>
+          <div class="small">
+            <p><strong>Exclusive price:</strong> GST = price × (rate/100). Total = price + GST.</p>
+            <p><strong>Inclusive price:</strong> Base = price ÷ (1 + rate/100). GST = price − Base.</p>
+            <p><strong>Intra-state:</strong> CGST = SGST = GST ÷ 2. <strong>Inter-state:</strong> IGST = GST.</p>
+          </div>
+        </details>
+      </section>
+
+      <!-- OUTPUT CARD -->
+      <section class="card" aria-labelledby="billHeading">
+        <h2 id="billHeading">Items & Bill</h2>
+        <div class="inline" style="justify-content:space-between; margin-bottom:10px">
+          <div class="muted" id="supplyLabel">Supply: Intra-state (CGST + SGST)</div>
+          <div class="inline">
+            <button class="btn ghost" id="printBill">Print / Save PDF</button>
+            <button class="btn danger" id="clearAll">Clear All</button>
+          </div>
+        </div>
+
+        <div class="tableWrap" style="overflow:auto;">
+          <table id="itemsTable" aria-describedby="billHeading">
+            <thead>
+              <tr>
+                <th>Item</th>
+                <th class="right">Qty</th>
+                <th class="right">Base/Unit</th>
+                <th class="right">GST %</th>
+                <th class="right">GST Amt</th>
+                <th class="right">Total</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="itemsBody">
+              <tr><td colspan="7" class="small" style="padding:14px; text-align:center; color: var(--muted)">No items yet. Add your first item ➜</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="summary" id="summary" aria-live="polite" aria-atomic="true">
+          <div class="pill"><span>Taxable Value</span><strong id="taxableValue">₹0.00</strong></div>
+          <div class="pill" id="cgstPill"><span>Total CGST</span><strong id="cgstTotal">₹0.00</strong></div>
+          <div class="pill" id="sgstPill"><span>Total SGST</span><strong id="sgstTotal">₹0.00</strong></div>
+          <div class="pill" id="igstPill" style="display:none"><span>Total IGST</span><strong id="igstTotal">₹0.00</strong></div>
+          <div class="pill" style="grid-column: 1 / -1; background: linear-gradient(90deg, rgba(124,156,255,.25), rgba(95,225,161,.25)); border-color: transparent">
+            <span>Grand Total</span><strong id="grandTotal" style="font-size: 22px">₹0.00</strong>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <section class="card" style="margin-top:18px">
+      <h2>Quick Examples</h2>
+      <div class="inline" style="gap:8px; flex-wrap:wrap">
+        <button class="btn ghost" data-demo='{"name":"Notebook","qty":2,"price":100,"mode":"exclusive","rate":12}'>Exclusive: ₹100 @ 12%</button>
+        <button class="btn ghost" data-demo='{"name":"Shoes","qty":1,"price":1416,"mode":"inclusive","rate":18}'>Inclusive: ₹1416 @ 18%</button>
+        <button class="btn ghost" data-demo='{"name":"Custom Service","qty":1,"price":5000,"mode":"exclusive","rate":"custom","custom":7.5}'>Custom 7.5%</button>
+      </div>
+    </section>
+
+    <p class="small" style="text-align:center; margin:16px 0 40px">Designed for Arya Develop In. For official compliance, verify rates/HSC codes as applicable.</p>
+  </main>
+
+  <!-- Link external JavaScript -->
+  <script src="script.js"></script>
+</body>
+</html>
